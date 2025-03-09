@@ -74,14 +74,11 @@ Para rodar o serviço `SharedDatabaseService`, siga as instruções abaixo:
 5. **Iniciando ruff e mypy**:
     ## Antes de cada commit, use os seguintes comandos:
     - Para rodar o `ruff` e corrigir os problemas encontrados, siga os passos abaixo:
-        ```bash
-        ruff .
-        ```
+
         - Formate o código para o padrão configurado:
         ```bash
         ruff format .
         ```
-
         - Verifique se o código possui algum problema relatado:
         ```bash
         ruff check .
@@ -96,7 +93,7 @@ Para rodar o serviço `SharedDatabaseService`, siga as instruções abaixo:
         mypy .
         ```
         Se aparecer problemas, você deve resolvê-los um a um.
-        
+
 6. **Instalando Docker**:
 - Siga as instruções para instalar o Docker no seu sistema operacional:
     - [Windows](https://docs.docker.com/desktop/install/windows-install/)
@@ -106,7 +103,7 @@ Para rodar o serviço `SharedDatabaseService`, siga as instruções abaixo:
     - Rode o comando para criar o container:
 
     ```bash
-    docker run -d --name api-tecsus2 \
+    docker run -d --name api-tecsus \
        -e POSTGRES_USER=codenine \
        -e POSTGRES_PASSWORD=codenine2025 \
        -e POSTGRES_DB=tecsus \
