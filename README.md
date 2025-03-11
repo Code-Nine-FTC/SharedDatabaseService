@@ -55,12 +55,11 @@ Para rodar o serviço `SharedDatabaseService`, siga as instruções abaixo:
                 "request": "launch",
                 "module": "uvicorn",
                 "args": [
-                    "app.main:app",
+                    "main:app",
                     "--host",
                     "127.0.0.1",
                     "--port",
                     "5060",
-                    "--reload"
                 ],
                 "env": {
                     "PYTHONPYCACHEPREFIX": "${workspaceFolder}/.pycache_global"
@@ -126,80 +125,80 @@ Para rodar o serviço `SharedDatabaseService`, siga as instruções abaixo:
 
     ```python
     from logging.config import fileConfig
-        from alembic import context
-        from sqlalchemy.ext.asyncio import create_async_engine
-        from sqlalchemy.ext.asyncio import AsyncConnection
-        from models.config.settings import settings
-        from models.db_model import Base
-        import asyncio
+    from alembic import context
+    from sqlalchemy.ext.asyncio import create_async_engine
+    from sqlalchemy.ext.asyncio import AsyncConnection
+    from app.config.settings import settings
+    from app.core.models.db_model import Base
+    import asyncio
 
-        # This is the Alembic Config object, which provides
-        # access to the values within the .ini file in use.
-        config = context.config
+    # This is the Alembic Config object, which provides
+    # access to the values within the .ini file in use.
+    config = context.config
 
-        # Set the database URL from your settings
-        config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+    # Set the database URL from your settings
+    config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
 
-        # Interpret the config file for Python logging.
-        # This line sets up loggers basically.
-        if config.config_file_name is not None:
-            fileConfig(config.config_file_name)
+    # Interpret the config file for Python logging.
+    # This line sets up loggers basically.
+    if config.config_file_name is not None:
+        fileConfig(config.config_file_name)
 
-        # Add your model's MetaData object here
-        # for 'autogenerate' support
-        target_metadata = Base.metadata
+    # Add your model's MetaData object here
+    # for 'autogenerate' support
+    target_metadata = Base.metadata
 
-        def run_migrations_offline() -> None:
-            """Run migrations in 'offline' mode."""
-            url = config.get_main_option("sqlalchemy.url")
-            context.configure(
-                url=url,
-                target_metadata=target_metadata,
-                literal_binds=True,
-                dialect_opts={"paramstyle": "named"},
-            )
+    def run_migrations_offline() -> None:
+        """Run migrations in 'offline' mode."""
+        url = config.get_main_option("sqlalchemy.url")
+        context.configure(
+            url=url,
+            target_metadata=target_metadata,
+            literal_binds=True,
+            dialect_opts={"paramstyle": "named"},
+        )
 
-            with context.begin_transaction():
-                context.run_migrations()
+        with context.begin_transaction():
+            context.run_migrations()
 
-        async def run_async_migrations() -> None:
-            """Run migrations in 'online' mode using an asynchronous engine."""
-            try:
-                # Create an asynchronous engine
-                connectable = create_async_engine(config.get_main_option("sqlalchemy.url"))
+    async def run_async_migrations() -> None:
+        """Run migrations in 'online' mode using an asynchronous engine."""
+        try:
+            # Create an asynchronous engine
+            connectable = create_async_engine(config.get_main_option("sqlalchemy.url"))
 
-                async with connectable.connect() as connection:
-                    # Configure the context with the connection
-                    await connection.run_sync(do_run_migrations)
-            except ConnectionRefusedError as e:
-                print(f"Database connection refused: {e}")
-                print("Please check if the database server is running and the connection details are correct.")
-                raise
-            except Exception as e:
-                print(f"An error occurred while running migrations: {e}")
-                raise
+            async with connectable.connect() as connection:
+                # Configure the context with the connection
+                await connection.run_sync(do_run_migrations)
+        except ConnectionRefusedError as e:
+            print(f"Database connection refused: {e}")
+            print("Please check if the database server is running and the connection details are correct.")
+            raise
+        except Exception as e:
+            print(f"An error occurred while running migrations: {e}")
+            raise
 
-        def do_run_migrations(connection: AsyncConnection) -> None:
-            """Run migrations synchronously within an asynchronous context."""
-            context.configure(
-                connection=connection,
-                target_metadata=target_metadata,
-                compare_type=True,
-                compare_server_default=True,
-            )
+    def do_run_migrations(connection: AsyncConnection) -> None:
+        """Run migrations synchronously within an asynchronous context."""
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,
+            compare_server_default=True,
+        )
 
-            with context.begin_transaction():
-                context.run_migrations()
+        with context.begin_transaction():
+            context.run_migrations()
 
-        def run_migrations_online() -> None:
-            """Run migrations in 'online' mode."""
-            # Run the async migrations
-            asyncio.run(run_async_migrations())
+    def run_migrations_online() -> None:
+        """Run migrations in 'online' mode."""
+        # Run the async migrations
+        asyncio.run(run_async_migrations())
 
-        if context.is_offline_mode():
-            run_migrations_offline()
-        else:
-            run_migrations_online()
+    if context.is_offline_mode():
+        run_migrations_offline()
+    else:
+        run_migrations_online()
     ```
 
     - Gerar revisão do banco de dados:
