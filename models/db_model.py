@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any
-
+from datetime import datetime
 from sqlalchemy import (
     BIGINT,
     JSON,
@@ -13,6 +13,7 @@ from sqlalchemy import (
     extract,
     func,
     text,
+    DateTime
 )
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
@@ -29,11 +30,11 @@ class User(Base):
     name: Mapped[str] = mapped_column(String)
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
-    create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    create_date: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
-    last_update: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    last_update: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
     old_password: Mapped[list[dict[str, Any]]] = mapped_column(
         JSON,
@@ -55,16 +56,13 @@ class WeatherStation(Base):
     )
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
-    create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    create_date:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
-    last_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    last_date:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
-    last_update: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
-    )
-    is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default=0)
 
 
 class ParameterType(Base):
@@ -77,13 +75,13 @@ class ParameterType(Base):
     )
     measure_unit: Mapped[str] = mapped_column(String)
     qnt_decimals: Mapped[int] = mapped_column(Integer)
-    offset: Mapped[float | None] = mapped_column(Float)
-    factor: Mapped[float | None] = mapped_column(Float)
-    create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    offset: Mapped[float | None] = mapped_column(Float, server_default=None)
+    factor: Mapped[float | None] = mapped_column(Float, server_default=None)
+    create_date:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
-    last_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    last_date:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
 
 
@@ -110,11 +108,11 @@ class TypeAlert(Base):
     name: Mapped[str] = mapped_column(String)
     value: Mapped[str] = mapped_column(String)
     math_signal: Mapped[str] = mapped_column(String)
-    create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    create_date:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
-    last_edit: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    last_edit:Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
 
     parameter = relationship("Parameter", back_populates="type_alerts")
@@ -140,8 +138,8 @@ class Alert(Base):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     measure_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("measures.id"))
     type_alert_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("type_alerts.id"))
-    create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+    create_date: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
     )
 
     measure = relationship("Measures", back_populates="alerts")
