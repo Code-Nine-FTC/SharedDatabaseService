@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
 
-from datetime import datetime
 from typing import Any
 
 from sqlalchemy import (
@@ -12,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    extract,
     func,
     text,
 )
@@ -28,20 +28,12 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String)
-    last_name: Mapped[str] = mapped_column(String)
-    cpf: Mapped[str] = mapped_column(String, unique=True)
     email: Mapped[str] = mapped_column(String, unique=True)
-    phone_number: Mapped[str | None] = mapped_column(String)
     password: Mapped[str] = mapped_column(String)
-    user_profile: Mapped[list[int]] = mapped_column(
-        JSON,
-        server_default=text("'[]'::jsonb"),
-        comment="List of user profiles",
-    )
-    initial_date: Mapped[datetime] = mapped_column(
+    create_date: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    last_update: Mapped[datetime] = mapped_column(
+    last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
     old_password: Mapped[list[dict[str, Any]]] = mapped_column(
@@ -57,47 +49,98 @@ class WeatherStation(Base):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String)
     uid: Mapped[str] = mapped_column(String, unique=True)
-    postcode: Mapped[str] = mapped_column(String)
-    neighboord: Mapped[str] = mapped_column(String)
-    number: Mapped[str] = mapped_column(String)
-    city: Mapped[str] = mapped_column(String)
-    street: Mapped[str] = mapped_column(String)
+    address: Mapped[list[str]] = mapped_column(
+        JSON,
+        server_default=text("'[]'::jsonb"),
+        comment="List of address",
+    )
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
-    initial_date: Mapped[datetime] = mapped_column(
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    last_date: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
-    user_id = mapped_column(Integer, ForeignKey("users.id"))
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="0")
 
-    user = relationship("User", back_populates="weather_stations")
+
+class ParameterType(Base):
+    __tablename__ = "parameter_types"
+
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
+    name: Mapped[str] = mapped_column(String)
+    json: Mapped[dict[str, Any]] = mapped_column(  # Trocar o Nome do Campo depois
+        JSON, server_default=text("'{}'::jsonb")
+    )
+    measure_unit: Mapped[str] = mapped_column(String)
+    qnt_decimals: Mapped[int] = mapped_column(Integer)
+    offset: Mapped[float | None] = mapped_column(Float, server_default=None)
+    factor: Mapped[float | None] = mapped_column(Float, server_default=None)
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
 
 
 class Parameter(Base):
     __tablename__ = "parameters"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
+    parameter_type_id: Mapped[int] = mapped_column(
+        BIGINT, ForeignKey("parameter_types.id")
+    )
+    station_id: Mapped[int] = mapped_column(
+        BIGINT, ForeignKey("weather_stations.id")
+    )
+
+    weather_station = relationship("WeatherStation", back_populates="parameters")
+    parameter = relationship("Parameter_Type", back_populates="parameters")
+
+
+class TypeAlert(Base):
+    __tablename__ = "type_alerts"
+
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
+    parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
     name: Mapped[str] = mapped_column(String)
-    unit: Mapped[str] = mapped_column(String)
-    offset: Mapped[float] = mapped_column(Float)
-    description: Mapped[str] = mapped_column(String)
-    factor: Mapped[float] = mapped_column(Float)
-    initial_date: Mapped[str] = mapped_column(DateTime, server_default=func.now())
-    last_date: Mapped[str] = mapped_column(DateTime, server_default=func.now())
-    has_alert = mapped_column(Boolean, default=False)
+    value: Mapped[str] = mapped_column(String)
+    math_signal: Mapped[str] = mapped_column(String)
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
+        DateTime, server_default=func.now()
+    )
+
+    parameter = relationship("Parameter", back_populates="type_alerts")
+
+
+class Measures(Base):
+    __tablename__ = "measures"
+
+    id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
+    value: Mapped[str] = mapped_column(String)
+    measure_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+
+    parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
+
+    parameter = relationship("Parameter", back_populates="measures")
 
 
 class Alert(Base):
     __tablename__ = "alerts"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
-    station_id: Mapped[int] = mapped_column(
-        BIGINT, ForeignKey("weather_stations.id")
+    measure_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("measures.id"))
+    type_alert_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("type_alerts.id"))
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
     )
-    parameter_id: Mapped[int] = mapped_column(Integer, ForeignKey("parameters.id"))
-    text_alert: Mapped[float] = mapped_column(String)
-    type_alert: Mapped[int] = mapped_column(Integer)
-    date_alert: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
 
-    weather_station = relationship("WeatherStation", back_populates="alerts")
-    parameter = relationship("Parameter", back_populates="alerts")
+    measure = relationship("Measures", back_populates="alerts")
+    type_alerts = relationship("Type_Alert", back_populates="alerts")
