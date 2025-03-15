@@ -10,6 +10,7 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    extract,
     func,
     text,
 )
@@ -28,8 +29,12 @@ class User(Base):
     name: Mapped[str] = mapped_column(String)
     email: Mapped[str] = mapped_column(String, unique=True)
     password: Mapped[str] = mapped_column(String)
-    create_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
-    last_update: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
     old_password: Mapped[list[dict[str, Any]]] = mapped_column(
         JSON,
         server_default=text("'[]'::jsonb"),
@@ -50,9 +55,15 @@ class WeatherStation(Base):
     )
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
-    create_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
-    last_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
-    last_update: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
     is_active: Mapped[bool] = mapped_column(Boolean, server_default=text("false"))
 
 
@@ -68,10 +79,12 @@ class ParameterType(Base):
     qnt_decimals: Mapped[int] = mapped_column(Integer)
     offset: Mapped[float | None] = mapped_column(Float)
     factor: Mapped[float | None] = mapped_column(Float)
-    create_date: Mapped[int] = mapped_column(  # Não é necessario ?
-        Integer, server_default=func.now()
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
     )
-    last_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    last_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
 
 
 class Parameter(Base):
@@ -97,8 +110,12 @@ class TypeAlert(Base):
     name: Mapped[str] = mapped_column(String)
     value: Mapped[str] = mapped_column(String)
     math_signal: Mapped[str] = mapped_column(String)
-    create_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
-    last_edit: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_edit: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
 
     parameter = relationship("Parameter", back_populates="type_alerts")
 
@@ -108,7 +125,9 @@ class Measures(Base):
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     value: Mapped[str] = mapped_column(String)
-    measure_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    measure_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
 
     parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
 
@@ -121,7 +140,9 @@ class Alert(Base):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     measure_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("measures.id"))
     type_alert_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("type_alerts.id"))
-    create_date: Mapped[int] = mapped_column(Integer, server_default=func.now())
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
 
     measure = relationship("Measures", back_populates="alerts")
     type_alerts = relationship("Type_Alert", back_populates="alerts")
