@@ -56,10 +56,12 @@ class WeatherStation(Base):
     )
     latitude: Mapped[float] = mapped_column(Float)
     longitude: Mapped[float] = mapped_column(Float)
-    create_date: Mapped[DateTime] = mapped_column(
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    last_date: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="0")
 
 
@@ -75,10 +77,12 @@ class ParameterType(Base):
     qnt_decimals: Mapped[int] = mapped_column(Integer)
     offset: Mapped[float | None] = mapped_column(Float, server_default=None)
     factor: Mapped[float | None] = mapped_column(Float, server_default=None)
-    create_date: Mapped[DateTime] = mapped_column(
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    last_date: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
 
 
 class Parameter(Base):
@@ -104,10 +108,12 @@ class TypeAlert(Base):
     name: Mapped[str] = mapped_column(String)
     value: Mapped[str] = mapped_column(String)
     math_signal: Mapped[str] = mapped_column(String)
-    create_date: Mapped[DateTime] = mapped_column(
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
+    )
+    last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    last_edit: Mapped[DateTime] = mapped_column(DateTime, server_default=func.now())
 
     parameter = relationship("Parameter", back_populates="type_alerts")
 
@@ -132,8 +138,8 @@ class Alert(Base):
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     measure_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("measures.id"))
     type_alert_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("type_alerts.id"))
-    create_date: Mapped[DateTime] = mapped_column(
-        DateTime, server_default=func.now()
+    create_date: Mapped[int] = mapped_column(
+        Integer, server_default=extract("epoch", func.now())
     )
 
     measure = relationship("Measures", back_populates="alerts")
