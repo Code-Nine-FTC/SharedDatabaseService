@@ -108,7 +108,7 @@ class TypeAlert(Base):
     __tablename__ = "type_alerts"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
-    parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
+    parameter_id: Mapped[int | None] = mapped_column(BIGINT, ForeignKey("parameters.id"), nullable=True)
     name: Mapped[str] = mapped_column(String)
     value: Mapped[int] = mapped_column(Integer)
     math_signal: Mapped[str] = mapped_column(String)
