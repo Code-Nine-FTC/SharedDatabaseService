@@ -15,7 +15,7 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.ext.asyncio import AsyncSession, AsyncAttrs
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
@@ -86,6 +86,7 @@ class ParameterType(Base):
     )
     parameters = relationship("Parameter", back_populates="parameter_type")
 
+
 class Parameter(Base):
     __tablename__ = "parameters"
 
@@ -103,14 +104,13 @@ class Parameter(Base):
     measures = relationship("Measures", back_populates="parameter")
 
 
-
 class TypeAlert(Base):
     __tablename__ = "type_alerts"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
     name: Mapped[str] = mapped_column(String)
-    value: Mapped[str] = mapped_column(String)
+    value: Mapped[int] = mapped_column(Integer)
     math_signal: Mapped[str] = mapped_column(String)
     create_date: Mapped[int] = mapped_column(
         Integer, server_default=extract("epoch", func.now())
@@ -121,7 +121,6 @@ class TypeAlert(Base):
 
     parameter = relationship("Parameter", back_populates="type_alerts")
     alerts = relationship("Alert", back_populates="type_alert")
-
 
 
 class Measures(Base):
