@@ -15,11 +15,11 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.ext.asyncio import AsyncSession, AsyncAttrs
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
-class Base(AsyncSession, DeclarativeBase):
+class Base(AsyncAttrs, DeclarativeBase):
     pass
 
 
@@ -63,6 +63,7 @@ class WeatherStation(Base):
         DateTime, server_default=func.now()
     )
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="0")
+    parameters = relationship("Parameter", back_populates="weather_station")
 
 
 class ParameterType(Base):
@@ -83,7 +84,7 @@ class ParameterType(Base):
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-
+    parameters = relationship("Parameter", back_populates="parameter_type")
 
 class Parameter(Base):
     __tablename__ = "parameters"
@@ -97,7 +98,10 @@ class Parameter(Base):
     )
 
     weather_station = relationship("WeatherStation", back_populates="parameters")
-    parameter = relationship("Parameter_Type", back_populates="parameters")
+    parameter_type = relationship("ParameterType", back_populates="parameters")
+    type_alerts = relationship("TypeAlert", back_populates="parameter")
+    measures = relationship("Measures", back_populates="parameter")
+
 
 
 class TypeAlert(Base):
@@ -116,6 +120,8 @@ class TypeAlert(Base):
     )
 
     parameter = relationship("Parameter", back_populates="type_alerts")
+    alerts = relationship("Alert", back_populates="type_alert")
+
 
 
 class Measures(Base):
@@ -130,6 +136,7 @@ class Measures(Base):
     parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
 
     parameter = relationship("Parameter", back_populates="measures")
+    alerts = relationship("Alert", back_populates="measure")
 
 
 class Alert(Base):
@@ -143,4 +150,4 @@ class Alert(Base):
     )
 
     measure = relationship("Measures", back_populates="alerts")
-    type_alerts = relationship("Type_Alert", back_populates="alerts")
+    type_alert = relationship("TypeAlert", back_populates="alerts")
