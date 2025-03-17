@@ -15,11 +15,10 @@ from sqlalchemy import (
     func,
     text,
 )
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
 
 
-class Base(AsyncSession, DeclarativeBase):
+class Base(DeclarativeBase):
     pass
 
 
@@ -64,6 +63,10 @@ class WeatherStation(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="0")
 
+    parameters: Mapped[list["Parameter"]] = relationship(
+        back_populates="weather_station", cascade="all, delete-orphan"
+    )
+
 
 class ParameterType(Base):
     __tablename__ = "parameter_types"
@@ -84,6 +87,10 @@ class ParameterType(Base):
         DateTime, server_default=func.now()
     )
 
+    parameters: Mapped[list["Parameter"]] = relationship(
+        back_populates="parameter_type"
+    )
+
 
 class Parameter(Base):
     __tablename__ = "parameters"
@@ -96,8 +103,14 @@ class Parameter(Base):
         BIGINT, ForeignKey("weather_stations.id")
     )
 
-    weather_station = relationship("WeatherStation", back_populates="parameters")
-    parameter = relationship("Parameter_Type", back_populates="parameters")
+    weather_station: Mapped["WeatherStation"] = relationship(
+        back_populates="parameters"
+    )
+    parameter_type: Mapped["ParameterType"] = relationship(
+        back_populates="parameters"
+    )
+    measures: Mapped[list["Measures"]] = relationship(back_populates="parameter")
+    type_alerts: Mapped[list["TypeAlert"]] = relationship(back_populates="parameter")
 
 
 class TypeAlert(Base):
@@ -115,7 +128,8 @@ class TypeAlert(Base):
         DateTime, server_default=func.now()
     )
 
-    parameter = relationship("Parameter", back_populates="type_alerts")
+    parameter: Mapped["Parameter"] = relationship(back_populates="type_alerts")
+    alerts: Mapped[list["Alert"]] = relationship(back_populates="type_alert")
 
 
 class Measures(Base):
@@ -129,7 +143,8 @@ class Measures(Base):
 
     parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
 
-    parameter = relationship("Parameter", back_populates="measures")
+    parameter: Mapped["Parameter"] = relationship(back_populates="measures")
+    alerts: Mapped[list["Alert"]] = relationship(back_populates="measure")
 
 
 class Alert(Base):
@@ -142,5 +157,5 @@ class Alert(Base):
         Integer, server_default=extract("epoch", func.now())
     )
 
-    measure = relationship("Measures", back_populates="alerts")
-    type_alerts = relationship("Type_Alert", back_populates="alerts")
+    measure: Mapped["Measures"] = relationship(back_populates="alerts")
+    type_alert: Mapped["TypeAlert"] = relationship(back_populates="alerts")
