@@ -118,6 +118,8 @@ class TypeAlert(Base):
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
+    status: Mapped[str | None] = mapped_column(String, nullable=True)
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
 
     parameter = relationship("Parameter", back_populates="type_alerts")
     alerts = relationship("Alert", back_populates="type_alert")
