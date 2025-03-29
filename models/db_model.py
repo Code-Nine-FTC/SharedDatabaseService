@@ -62,7 +62,7 @@ class WeatherStation(Base):
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    is_active: Mapped[bool] = mapped_column(Boolean, server_default="0")
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
     parameters = relationship("Parameter", back_populates="weather_station")
 
 
@@ -81,6 +81,7 @@ class ParameterType(Base):
     create_date: Mapped[int] = mapped_column(
         Integer, server_default=extract("epoch", func.now())
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
@@ -92,10 +93,10 @@ class Parameter(Base):
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     parameter_type_id: Mapped[int] = mapped_column(
-        BIGINT, ForeignKey("parameter_types.id")
+        BIGINT, ForeignKey("parameter_types.id"), index=True
     )
     station_id: Mapped[int] = mapped_column(
-        BIGINT, ForeignKey("weather_stations.id")
+        BIGINT, ForeignKey("weather_stations.id"), index=True
     )
 
     weather_station = relationship("WeatherStation", back_populates="parameters")
@@ -109,13 +110,13 @@ class TypeAlert(Base):
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     parameter_id: Mapped[int | None] = mapped_column(
-        BIGINT, ForeignKey("parameters.id"), nullable=True
+        BIGINT, ForeignKey("parameters.id"), nullable=True, index=True
     )
     name: Mapped[str] = mapped_column(String)
     value: Mapped[int] = mapped_column(Integer)
     math_signal: Mapped[str] = mapped_column(String)
     create_date: Mapped[int] = mapped_column(
-        Integer, server_default=extract("epoch", func.now())
+        Integer, server_default=extract("epoch", func.now()), index=True
     )
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
@@ -136,7 +137,9 @@ class Measures(Base):
         Integer, server_default=extract("epoch", func.now())
     )
 
-    parameter_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("parameters.id"))
+    parameter_id: Mapped[int] = mapped_column(
+        BIGINT, ForeignKey("parameters.id"), index=True
+    )
 
     parameter = relationship("Parameter", back_populates="measures")
     alerts = relationship("Alert", back_populates="measure")
@@ -146,8 +149,12 @@ class Alert(Base):
     __tablename__ = "alerts"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
-    measure_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("measures.id"))
-    type_alert_id: Mapped[int] = mapped_column(BIGINT, ForeignKey("type_alerts.id"))
+    measure_id: Mapped[int] = mapped_column(
+        BIGINT, ForeignKey("measures.id"), index=True
+    )
+    type_alert_id: Mapped[int] = mapped_column(
+        BIGINT, ForeignKey("type_alerts.id"), index=True
+    )
     create_date: Mapped[int] = mapped_column(
         Integer, server_default=extract("epoch", func.now())
     )
