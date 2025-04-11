@@ -158,6 +158,7 @@ class Alert(Base):
     create_date: Mapped[int] = mapped_column(
         Integer, server_default=extract("epoch", func.now())
     )
+    is_read: Mapped[bool] = mapped_column(Boolean, server_default="0")
 
     measure = relationship("Measures", back_populates="alerts")
     type_alert = relationship("TypeAlert", back_populates="alerts")
