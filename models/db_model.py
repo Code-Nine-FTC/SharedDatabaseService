@@ -98,6 +98,7 @@ class Parameter(Base):
     station_id: Mapped[int] = mapped_column(
         BIGINT, ForeignKey("weather_stations.id"), index=True
     )
+    is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
 
     weather_station = relationship("WeatherStation", back_populates="parameters")
     parameter_type = relationship("ParameterType", back_populates="parameters")
