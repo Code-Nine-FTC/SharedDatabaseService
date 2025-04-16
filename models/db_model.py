@@ -76,6 +76,7 @@ class ParameterType(Base):
     )
     measure_unit: Mapped[str] = mapped_column(String)
     qnt_decimals: Mapped[int] = mapped_column(Integer)
+    detect_type: Mapped[str] = mapped_column(String)
     offset: Mapped[float | None] = mapped_column(Float, server_default=None)
     factor: Mapped[float | None] = mapped_column(Float, server_default=None)
     create_date: Mapped[int] = mapped_column(
