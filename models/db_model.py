@@ -71,9 +71,7 @@ class ParameterType(Base):
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
     name: Mapped[str] = mapped_column(String)
-    json: Mapped[dict[str, Any]] = mapped_column(  # Trocar o Nome do Campo depois
-        JSON, server_default=text("'{}'::jsonb")
-    )
+    detect_type: Mapped[str | None] = mapped_column(String, server_default=None)
     measure_unit: Mapped[str] = mapped_column(String)
     qnt_decimals: Mapped[int] = mapped_column(Integer)
     offset: Mapped[float | None] = mapped_column(Float, server_default=None)
