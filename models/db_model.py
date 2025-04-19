@@ -131,7 +131,7 @@ class Measures(Base):
     __tablename__ = "measures"
 
     id: Mapped[int] = mapped_column(BIGINT, primary_key=True, index=True)
-    value: Mapped[str] = mapped_column(String)
+    value: Mapped[float] = mapped_column(Float)
     measure_date: Mapped[int] = mapped_column(
         Integer, server_default=extract("epoch", func.now())
     )
