@@ -63,7 +63,9 @@ class WeatherStation(Base):
         DateTime, server_default=func.now()
     )
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
-    parameters = relationship("Parameter", back_populates="weather_station", cascade="all, delete-orphan")
+    parameters = relationship(
+        "Parameter", back_populates="weather_station", cascade="all,"
+    )
 
 
 class ParameterType(Base):
@@ -83,7 +85,9 @@ class ParameterType(Base):
     last_update: Mapped[DateTime] = mapped_column(
         DateTime, server_default=func.now()
     )
-    parameters = relationship("Parameter", back_populates="parameter_type", cascade="all, delete-orphan")
+    parameters = relationship(
+        "Parameter", back_populates="parameter_type", cascade="all,"
+    )
 
 
 class Parameter(Base):
@@ -98,10 +102,16 @@ class Parameter(Base):
     )
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
 
-    weather_station = relationship("WeatherStation", back_populates="parameters", cascade="all, delete-orphan")
-    parameter_type = relationship("ParameterType", back_populates="parameters", cascade="all, delete-orphan")
-    type_alerts = relationship("TypeAlert", back_populates="parameter", cascade="all, delete-orphan")
-    measures = relationship("Measures", back_populates="parameter", cascade="all, delete-orphan")
+    weather_station = relationship(
+        "WeatherStation", back_populates="parameters", cascade="all,"
+    )
+    parameter_type = relationship(
+        "ParameterType", back_populates="parameters", cascade="all,"
+    )
+    type_alerts = relationship(
+        "TypeAlert", back_populates="parameter", cascade="all,"
+    )
+    measures = relationship("Measures", back_populates="parameter", cascade="all,")
 
 
 class TypeAlert(Base):
@@ -123,8 +133,10 @@ class TypeAlert(Base):
     status: Mapped[str] = mapped_column(String, nullable=False, server_default="D")
     is_active: Mapped[bool] = mapped_column(Boolean, server_default="1")
 
-    parameter = relationship("Parameter", back_populates="type_alerts", cascade="all, delete-orphan")
-    alerts = relationship("Alert", back_populates="type_alert", cascade="all, delete-orphan")
+    parameter = relationship(
+        "Parameter", back_populates="type_alerts", cascade="all,"
+    )
+    alerts = relationship("Alert", back_populates="type_alert", cascade="all,")
 
 
 class Measures(Base):
@@ -140,8 +152,8 @@ class Measures(Base):
         BIGINT, ForeignKey("parameters.id"), index=True
     )
 
-    parameter = relationship("Parameter", back_populates="measures", cascade="all, delete-orphan")
-    alerts = relationship("Alert", back_populates="measure", cascade="all, delete-orphan")
+    parameter = relationship("Parameter", back_populates="measures", cascade="all,")
+    alerts = relationship("Alert", back_populates="measure", cascade="all,")
 
 
 class Alert(Base):
